@@ -1,6 +1,10 @@
 #!/usr/bin/python3
-from board import Board
+from game import Game
+from player import Player
 
-board = Board()
-board.initialize_board(8)
-board.print_board()
+player1 = Player(True, 'X')
+player2 = Player(False, 'O')
+
+new_game = Game(player1, player2, 8)
+
+new_game.start_game()

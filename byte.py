@@ -13,6 +13,7 @@ class Byte:
             return self.colors[ind]
         except:
             print("Indexing error: ", ind)
+            return -1
         
     def to_string(self):
         returningString = '['

@@ -7,8 +7,14 @@ class Board:
         self.board = []
 
     def initialize_board(self, dim):
+        """Initialize the board dimension: dim x dim, and set the figures. Note: dim in range 8 - 16"""
+        if(dim < 8 or dim > 16):
+            return False
         if (dim - 2) * dim / 2 % 8 != 0:
             return False
+        if (dim > 16):
+            return False
+        
         self.dim = dim
         for i in range(0,dim):
             self.board.append([])
@@ -54,3 +60,26 @@ class Board:
         for i in range(0,self.dim*10+4):
             print("=", end="")
         print()
+
+    def is_empty(self)-> bool:
+        flag = True
+        for i in range(0,self.dim):
+            for j in range(0, self.dim):
+                if self.board[i][j] != None and self.board[i][j] != False and len(self.board[i][j].colors) != 0:
+                    flag = False
+        return flag
+    
+    def is_tile_black(self, i, j):
+        return (i+j)%2==0
+    
+    def is_tile_white(self,i,j):
+        return (i+j)%2==1
+
+    def is_state_valid(self) -> bool:
+        for i in range(0, self.dim):
+            for j in range(0, self.dim):
+                if(self.is_tile_white(i,j) and self.board[i][j] != False):
+                    return False
+                if(self.is_tile_black(i,j) and len(self.board[i][j].colors) > 8):
+                    return False
+        return True
