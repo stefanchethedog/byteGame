@@ -13,21 +13,23 @@ class Board:
         for i in range(0,dim):
             self.board.append([])
             for j in range(0,dim):
-                if((i+j)%2 == 1):
+                if((i+j)%2 == 0):
                     self.board[i].append(None)
                 else:
                     self.board[i].append(False)
-        row = 2
-        while row < dim - 2:
-            column = 1 if row % 2 == 0 else 0
+        row = 1
+        black = True
+        while row < dim - 1:
+            column = 1 if row % 2 == 1 else 0
             while column < dim:
                 self.board[row][column] = (
                     Byte("", (row, column))
                     if row <= 1 and row >= dim - 2
-                    else Byte("X" if row < dim / 2 else "O", (row, column))
+                    else Byte("X" if black else "O", (row, column))
                 )
                 column += 2
             row+=1
+            black = not black
     
     def print_board(self):
         for i in range(0,self.dim*10+4):
