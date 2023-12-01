@@ -23,14 +23,14 @@ class Board:
                     self.board[i].append(None)
                 else:
                     self.board[i].append(False)
-        row = 1
-        black = True
-        while row < dim - 1:
+        row = 0
+        black = False
+        while row < dim:
             column = 1 if row % 2 == 1 else 0
             while column < dim:
                 self.board[row][column] = (
                     Byte("", (row, column))
-                    if row <= 1 and row >= dim - 2
+                    if row < 1 or row >= dim - 1
                     else Byte("X" if black else "O", (row, column))
                 )
                 column += 2
@@ -45,10 +45,10 @@ class Board:
         for i in range(0,self.dim):
             print('||', end="")
             for j in range(0, self.dim):                    
-                if self.board[i][j] == None:
-                    print("__________", end='')
-                elif self.board[i][j] == False:
+                if self.board[i][j] == False:
                     print("          ", end='')
+                elif len(self.board[i][j].colors) == 0:
+                    print("__________", end='')
                 else:
                     n = 8 - len(self.board[i][j].colors)
                     print(self.board[i][j].to_string(), end='')

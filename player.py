@@ -20,10 +20,10 @@ class Player:
         return False
 
     def is_byte_empty(self, board: Board, src_byte) -> bool:
-        return len(board.board[letters_to_numbers[src_byte[0]]][src_byte[1]]) > 0
+        return len(board.board[letters_to_numbers[src_byte[0]]][int(src_byte[1])-1]) > 0
 
     def is_index_in_byte_correct(self, board: Board, src_byte, index_in_byte) -> bool:
-        if(board.board[letters_to_numbers[src_byte[0]]][int(src_byte[1])].get_color(index_in_byte) != -1):
+        if(board.board[letters_to_numbers[src_byte[0]]][int(src_byte[1]) - 1].get_color(index_in_byte) != -1):
             return True
         return False
 
@@ -41,15 +41,15 @@ class Player:
         index_in_byte = ""
 
         print("Source byte: ", end="")
-        input(src_byte)
+        src_byte = input()
 
         print("Move: ", end="")
-        input(move)
+        move = input()
 
         print("Index of src byte: ", end="")
-        input(index_in_byte)
+        index_in_byte = input()
         if not self.test_move(board, src_byte, move, index_in_byte):
-            print("Bad move.")
+            print("Bad move. Please try again... Press anything to continue.")
             return False
 
         return True
