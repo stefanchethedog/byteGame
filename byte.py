@@ -36,7 +36,6 @@ class Byte:
         return len(self.colors)
 
     def is_movable(self, byte, startingIndex):
-        # ovde da se razmisli da li da se dozvoli pomeranje samo celog bajta ako je byte duzine nula ili ne
         # self.colors[startingIndex : ] -> byte
         lenByte = len(byte.colors)
         lenSelf = len(self.colors)

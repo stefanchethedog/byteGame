@@ -128,25 +128,6 @@ class Board:
         
         return self.board[iTo][jTo].is_movable(self.board[iFrom][jFrom], startingIndex)
     
-    def find_nearest_stack(self, iStart, jStart):
-        GL = self.find_nearest_stack_iterative(iStart, jStart, iStart-1, jStart-1)
-        GD = self.find_nearest_stack_iterative(iStart, jStart, iStart-1, jStart+1)        
-        DL = self.find_nearest_stack_iterative(iStart, jStart, iStart+1, jStart-1)        
-        DD = self.find_nearest_stack_iterative(iStart, jStart, iStart+1, jStart+1)     
-
-        minimum = min([GL, GD, DL, DD])
-
-        nearestStacks = []
-        if(GL == minimum):
-            nearestStacks.append('GL')
-        if(GD == minimum):
-            nearestStacks.append('GD')
-        if(DL == minimum):
-            nearestStacks.append('DL')
-        if(DD == minimum):
-            nearestStacks.append('DD')
-        return nearestStacks
-
     def find_nearest_stack_iterative(self, iStart, jStart, iCurrent, jCurrent):
         if iCurrent < 0 or iCurrent >= self.dim or jCurrent < 0 or jCurrent >= self.dim:
             return 100000 
@@ -172,32 +153,3 @@ class Board:
                     nodesToVisit.put((iCur + 1, jCur - 1, roadLen + 1))
                 if iCur + 1 < self.dim and jCur + 1 < self.dim and not (iCur+1,jCur+1) in visitedNodes:
                     nodesToVisit.put((iCur + 1, jCur + 1, roadLen + 1))
-
-
-    def find_nearest_stack_recursive(
-        self,
-        iStart,
-        jStart,
-        iCurrent,
-        jCurrent,
-        visitedNodes: Set[Tuple[int, int]],
-    ):
-        """Using DFS, find the minimum number of moves to the next stack"""
-        # optimizacija bi bila da se uradi iterativno sa BFS-om (za takmicenje!!!)
-        if iCurrent >= self.dim or jCurrent >= self.dim or iCurrent < 0 or jCurrent < 0:
-            return 100000
-        elif (iCurrent, jCurrent) in visitedNodes:
-            return 100000
-        elif (iStart == iCurrent and jStart == jCurrent) or self.board[iCurrent][jCurrent].is_empty():
-            visitedNodes.add((iCurrent, jCurrent))
-            return 1 + min(
-                [
-                    self.find_nearest_stack(iStart, jStart, iCurrent - 1, jCurrent - 1),
-                    self.find_nearest_stack(iStart, jStart, iCurrent - 1, jCurrent + 1),
-                    self.find_nearest_stack(iStart, jStart, iCurrent + 1, jCurrent - 1),
-                    self.find_nearest_stack(iStart, jStart, iCurrent + 1, jCurrent + 1),
-                ]
-            )
-        else:
-            visitedNodes.add((iCurrent, jCurrent))
-            return 1
