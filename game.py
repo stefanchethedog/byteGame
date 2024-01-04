@@ -27,9 +27,9 @@ class Game:
         return self.board.is_empty()
 
     def has_player_won(self):
-        if self.playerX.score > 3 * self.board.dim // 8 // 2:
+        if self.playerX.score > (self.board.dim // 2 - 1) * self.board.dim // 8 // 2: # d * (d/2 - 1) // 8 // 2
             return True
-        if self.playerO.score > 3 * self.board.dim // 8 // 2:
+        if self.playerO.score > (self.board.dim // 2 - 1) * self.board.dim // 8 // 2:
             return True
         return False
 
@@ -50,25 +50,25 @@ class Game:
                     if currentIndexColor == self.play_turn:
                         areNeighboursEmpty = self.board.are_neighbours_empty(i, j)
                         if areNeighboursEmpty:
-                            # DFS za GL, GD, DL, DD i da se nadje broj poteza do steka
-                            GL = self.board.find_nearest_stack_iterative(i, j, i - 1, j - 1)
-                            GD = self.board.find_nearest_stack_iterative(i, j, i - 1, j + 1)
-                            DL = self.board.find_nearest_stack_iterative(i, j, i + 1, j - 1)
-                            DD = self.board.find_nearest_stack_iterative(i, j, i + 1, j + 1)
+                            if k == 0:
+                                GL = self.board.find_nearest_stack_iterative(i, j, i - 1, j - 1)
+                                GD = self.board.find_nearest_stack_iterative(i, j, i - 1, j + 1)
+                                DL = self.board.find_nearest_stack_iterative(i, j, i + 1, j - 1)
+                                DD = self.board.find_nearest_stack_iterative(i, j, i + 1, j + 1)
 
-                            minimum = min([GL, GD, DL, DD])
-                            if GL == minimum:
-                                srcByte = mappings.numbers_to_letters[i] + str(j + 1)
-                                possibleMoves.append((srcByte, "GL", k))
-                            if GD == minimum:
-                                srcByte = mappings.numbers_to_letters[i] + str(j + 1)
-                                possibleMoves.append((srcByte, "GD", k))
-                            if DL == minimum:
-                                srcByte = mappings.numbers_to_letters[i] + str(j + 1)
-                                possibleMoves.append((srcByte, "DL", k))
-                            if DD == minimum:
-                                srcByte = mappings.numbers_to_letters[i] + str(j + 1)
-                                possibleMoves.append((srcByte, "DD", k))
+                                minimum = min([GL, GD, DL, DD])
+                                if GL == minimum:
+                                    srcByte = mappings.numbers_to_letters[i] + str(j + 1)
+                                    possibleMoves.append((srcByte, "GL", k))
+                                if GD == minimum:
+                                    srcByte = mappings.numbers_to_letters[i] + str(j + 1)
+                                    possibleMoves.append((srcByte, "GD", k))
+                                if DL == minimum:
+                                    srcByte = mappings.numbers_to_letters[i] + str(j + 1)
+                                    possibleMoves.append((srcByte, "DL", k))
+                                if DD == minimum:
+                                    srcByte = mappings.numbers_to_letters[i] + str(j + 1)
+                                    possibleMoves.append((srcByte, "DD", k))
                         else:
                             GL = self.board.is_movable_from_to(i - 1, j - 1, i, j, k)
                             GD = self.board.is_movable_from_to(i - 1, j + 1, i, j, k)
@@ -100,7 +100,10 @@ class Game:
                 self.show_state()
             if self.is_game_over():
                 break
-
+            print()
+            print("Player X score: " + str(self.playerX.score) + "        Player O score: " + str(self.playerO.score))
+            print()
+            print('=============================================================================')
             if self.play_turn == "X":
                 # nadji moguce potezeX
                 possibleMoves = self.find_all_possible_moves()
@@ -112,7 +115,7 @@ class Game:
                 if self.playerX.isHuman == True:
                     (isPlayed, lenOfByte, iTo, jTo) = self.playerX.play_move(self.board, self.play_turn, possibleMoves)
                     if(isPlayed):
-                        if(lenOfByte != False):
+                        if(lenOfByte == 8):
                             topColor = self.board.board[iTo][jTo].get_color(7)
                             if topColor == 'X':
                                 self.playerX.score += 1
@@ -135,7 +138,7 @@ class Game:
                     # nadji moguce potezeO
                     (isPlayed, lenOfByte, iTo, jTo) = self.playerO.play_move(self.board, self.play_turn, possibleMoves)
                     if(isPlayed):
-                        if(lenOfByte != False):
+                        if(lenOfByte == 8):
                             topColor = self.board.board[iTo][jTo].get_color(7)
                             if topColor == 'X':
                                 self.playerX.score += 1
@@ -149,3 +152,4 @@ class Game:
                     # self.playerO.play_best_move()
                     print("Computer turn")
         print("The game is over.")
+        print("The winner is player " + ('X' if self.playerX.score > self.playerO.score else 'O'))

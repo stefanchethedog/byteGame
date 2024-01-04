@@ -4,7 +4,7 @@ from typing import Tuple
 class Byte:
     def __init__(self, col: str, coords: Tuple[int, int]):
         self.colors = []
-        self.colors.extend(list(col))
+        self.colors += col
         self.coords = coords
 
     def get_color(self, ind):
@@ -33,7 +33,7 @@ class Byte:
         
         byte.colors = byte.colors + self.colors[startingIndex:]
         self.colors = self.colors[:startingIndex]
-        return len(self.colors)
+        return len(byte.colors)
 
     def is_movable(self, byte, startingIndex):
         # self.colors[startingIndex : ] -> byte

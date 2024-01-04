@@ -16,8 +16,7 @@ class Board:
             return False
         if (dim - 2) * dim / 2 % 8 != 0:
             return False
-        if dim > 16:
-            return False
+
 
         self.dim = dim
         for i in range(0, dim):
@@ -98,8 +97,8 @@ class Board:
 
     def are_neighbours_empty(self, i, j):
         gl = (i - 1, j - 1)
-        gd = (i + 1, j - 1)
-        dl = (i - 1, j + 1)
+        gd = (i - 1, j + 1)
+        dl = (i + 1, j - 1)
         dd = (i + 1, j + 1)
 
         flag = True
