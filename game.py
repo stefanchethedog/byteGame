@@ -111,15 +111,15 @@ class Game:
                                 util -= 5
                         elif k == 7:
                             if self.board.board[i][j].get_color(k) == "X":
-                                util += 25
+                                util += 100
                             else:
-                                util -= 25
+                                util -= 100
                         elif k == stack_height - 1:
-                            if k < 5:
+                            if k < 4:
                                 if self.board.board[i][j].get_color(k) == "X":
-                                    util += 3
+                                    util += 4
                                 else:
-                                    util -= 3
+                                    util -= 4
                             else:
                                 if self.board.board[i][j].get_color(k) == "X":
                                     util += 6
@@ -127,21 +127,22 @@ class Game:
                                     util -= 6
                         else:
                             if self.board.board[i][j].get_color(k) == "X":
-                                util += 1
+                                util += 4
                             else:
-                                util -= 1
+                                util -= 4
         possibleMovesX = self.find_all_possible_moves()
         self.play_turn = "O"
         possibleMovesO = self.find_all_possible_moves()
-        util -= len(possibleMovesX) - len(possibleMovesO) 
+        util += (len(possibleMovesX) - len(possibleMovesO))//2
         self.play_turn = "X"
 
         if self.playerX.score == 1:
-            util += 50
+            util += 120
         if self.playerX.score == 2:
             util += 1000
+
         if self.playerO.score == 1:
-            util -= 50
+            util -= 120
         if self.playerO.score == 2:
             util -= 1000
 
@@ -158,9 +159,9 @@ class Game:
                     for k in range(0, stack_height):
                         if k == 0:
                             if self.board.board[i][j].get_color(0) == "O":
-                                util -= 2
+                                util -= 7
                             else:
-                                util += 2
+                                util += 7
                         elif k == 7:
                             if self.board.board[i][j].get_color(k) == "O":
                                 util -= 50
@@ -169,32 +170,32 @@ class Game:
                         elif k == stack_height - 1:
                             if k < 5:
                                 if self.board.board[i][j].get_color(k) == "O":
-                                    util -= 2
+                                    util -= 6
                                 else:
-                                    util += 2
+                                    util += 6
                             else:
                                 if self.board.board[i][j].get_color(k) == "O":
-                                    util -= 3
+                                    util -= 10
                                 else:
-                                    util += 3
+                                    util += 10
                         else:
                             if self.board.board[i][j].get_color(k) == "O":
-                                util -= 1
+                                util -= 4
                             else:
-                                util += 1
+                                util += 4
         possibleMovesO = self.find_all_possible_moves()
         self.play_turn = "X"
         possibleMovesX = self.find_all_possible_moves()
-        util += (len(possibleMovesX) - len(possibleMovesO)) // 2 
+        util += (len(possibleMovesX) - len(possibleMovesO)) * 6
         self.play_turn = "O"
 
         if self.playerX.score == 1:
-            util += 5000
+            util += 50
         if self.playerX.score == 2:
             util += 1000
 
         if self.playerO.score == 1:
-            util -= 5000
+            util -= 50
         if self.playerO.score == 2:
             util -= 1000
 
@@ -208,7 +209,9 @@ class Game:
 
     def make_move(self, move):
         srcByte, direction, indexInByte = move
-        iFrom, jFrom = mappings.letters_to_numbers[srcByte[0]], int(srcByte[1]) - 1
+
+        srcByteJ = int(srcByte[1]) if len(srcByte) == 2 else int (srcByte[1] + srcByte[2])
+        iFrom, jFrom = mappings.letters_to_numbers[srcByte[0]], srcByteJ - 1
         iTo, jTo = iFrom + (1 if direction[0] == 'D' else -1), jFrom + (1 if direction[1] == 'D' else -1)
 
         lenOfByte = self.board.board[iFrom][jFrom].move_to_byte(self.board.board[iTo][jTo], indexInByte)
@@ -322,7 +325,7 @@ class Game:
                     input()
                 else:
                     # self.playerX.play_best_move()
-                    print("Computer turn")
+                    print("Computer turn X")
                     ai_move = self.get_best_move()
                     print("AI moves: ", ai_move)
                     possibleMoves = self.find_all_possible_moves()
@@ -365,7 +368,7 @@ class Game:
                         continue
                     input()
                 else:
-                    print("Computer turn")
+                    print("Computer turn O")
                     ai_move = self.get_best_move()
                     print("AI moves: ", ai_move)
                     possibleMoves = self.find_all_possible_moves()
