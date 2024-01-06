@@ -106,30 +106,42 @@ class Game:
                     for k in range(0, stack_height):
                         if k == 0:
                             if self.board.board[i][j].get_color(0) == "X":
-                                util += 2
+                                util += 5
                             else:
-                                util -= 2
+                                util -= 5
                         elif k == 7:
                             if self.board.board[i][j].get_color(k) == "X":
-                                util += 200
+                                util += 25
                             else:
-                                util -= 200
+                                util -= 25
                         elif k == stack_height - 1:
-                            if self.board.board[i][j].get_color(k) == "X":
-                                util += 2
+                            if k < 5:
+                                if self.board.board[i][j].get_color(k) == "X":
+                                    util += 3
+                                else:
+                                    util -= 3
                             else:
-                                util -= 2
+                                if self.board.board[i][j].get_color(k) == "X":
+                                    util += 6
+                                else:
+                                    util -= 6
                         else:
                             if self.board.board[i][j].get_color(k) == "X":
                                 util += 1
                             else:
                                 util -= 1
+        possibleMovesX = self.find_all_possible_moves()
+        self.play_turn = "O"
+        possibleMovesO = self.find_all_possible_moves()
+        util -= len(possibleMovesX) - len(possibleMovesO) 
+        self.play_turn = "X"
+
         if self.playerX.score == 1:
-            util += 200
+            util += 50
         if self.playerX.score == 2:
             util += 1000
         if self.playerO.score == 1:
-            util -= 200
+            util -= 50
         if self.playerO.score == 2:
             util -= 1000
 
@@ -151,21 +163,43 @@ class Game:
                                 util += 2
                         elif k == 7:
                             if self.board.board[i][j].get_color(k) == "O":
-                                util -= 10
+                                util -= 50
                             else:
-                                util += 10
-                        elif k != stack_height:
-                            if self.board.board[i][j].get_color(k) == "O":
-                                util -= 2
+                                util += 50
+                        elif k == stack_height - 1:
+                            if k < 5:
+                                if self.board.board[i][j].get_color(k) == "O":
+                                    util -= 2
+                                else:
+                                    util += 2
                             else:
-                                util += 2
+                                if self.board.board[i][j].get_color(k) == "O":
+                                    util -= 3
+                                else:
+                                    util += 3
                         else:
                             if self.board.board[i][j].get_color(k) == "O":
                                 util -= 1
                             else:
                                 util += 1
+        possibleMovesO = self.find_all_possible_moves()
+        self.play_turn = "X"
+        possibleMovesX = self.find_all_possible_moves()
+        util += (len(possibleMovesX) - len(possibleMovesO)) // 2 
+        self.play_turn = "O"
+
+        if self.playerX.score == 1:
+            util += 5000
+        if self.playerX.score == 2:
+            util += 1000
+
+        if self.playerO.score == 1:
+            util -= 5000
+        if self.playerO.score == 2:
+            util -= 1000
 
         return util
+    
     
     def utility(self, maximize):
         if maximize:
@@ -224,6 +258,7 @@ class Game:
     def get_best_move(self):
         best_move = None
         max_eval = float('-inf')
+        min_eval = float('inf')
         alpha = float('-inf')
         beta = float('inf')
         current_depth = 2 
@@ -235,11 +270,17 @@ class Game:
             current_state.make_move(move)
             eval = current_state.minimax(current_depth, alpha, beta, self.play_turn == "X")
 
-            if eval > max_eval:
-                max_eval = eval
-                best_move = move
+            if self.play_turn == 'X':
+                if eval > max_eval:
+                    max_eval = eval
+                    best_move = move
+                    alpha = max(alpha, eval)
+            else:
+                if eval < min_eval:
+                    min_eval = eval
+                    best_move = move
+                    beta = min(beta, eval)
 
-            alpha = max(alpha, eval)
 
         current_depth += 1
         return best_move
@@ -285,8 +326,12 @@ class Game:
                     ai_move = self.get_best_move()
                     print("AI moves: ", ai_move)
                     possibleMoves = self.find_all_possible_moves()
+
                     if(len(possibleMoves) == 0):
                         self.play_turn = "O"
+
+                    if ai_move == None:
+                        ai_move = possibleMoves[0]
                     (isPlayed, lenOfByte, iTo, jTo) = self.playerX.play_move(self.board, self.play_turn, possibleMoves, ai_move)
                     if(isPlayed):
                         if(lenOfByte == 8):
@@ -304,9 +349,9 @@ class Game:
                 if(len(possibleMoves) == 0):
                     self.play_turn = "X"
                     continue
+                
                 print(possibleMoves)
                 if self.playerO.isHuman == True:
-                    # nadji moguce potezeO
                     (isPlayed, lenOfByte, iTo, jTo) = self.playerO.play_move(self.board, self.play_turn, possibleMoves)
                     if(isPlayed):
                         if(lenOfByte == 8):
@@ -326,6 +371,10 @@ class Game:
                     possibleMoves = self.find_all_possible_moves()
                     if(len(possibleMoves) == 0):
                         self.play_turn = "X"
+
+                    if ai_move == None:
+                        ai_move = possibleMoves[0]
+
                     (isPlayed, lenOfByte, iTo, jTo) = self.playerO.play_move(self.board, self.play_turn, possibleMoves, ai_move)
                     if(isPlayed):
                         if(lenOfByte == 8):
