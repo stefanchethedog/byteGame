@@ -1,3 +1,4 @@
+from copy import deepcopy
 from os import system
 from board import Board
 from player import Player
@@ -93,8 +94,159 @@ class Game:
                 j += 2
             i += 1
         return possibleMoves
+    
+    def utility_maximize_player(self):
+        util = 0
+
+        for i in range(self.board.dim):
+            for j in range(self.board.dim):
+                if not self.board.is_tile_white(i, j):
+                    stack_height = len(self.board.board[i][j].colors)
+
+                    for k in range(0, stack_height):
+                        if k == 0:
+                            if self.board.board[i][j].get_color(0) == "X":
+                                util += 2
+                            else:
+                                util -= 2
+                        elif k == 7:
+                            if self.board.board[i][j].get_color(k) == "X":
+                                util += 200
+                            else:
+                                util -= 200
+                        elif k == stack_height - 1:
+                            if self.board.board[i][j].get_color(k) == "X":
+                                util += 2
+                            else:
+                                util -= 2
+                        else:
+                            if self.board.board[i][j].get_color(k) == "X":
+                                util += 1
+                            else:
+                                util -= 1
+        if self.playerX.score == 1:
+            util += 200
+        if self.playerX.score == 2:
+            util += 1000
+        if self.playerO.score == 1:
+            util -= 200
+        if self.playerO.score == 2:
+            util -= 1000
+
+        return util
+    
+    def utility_minimize_player(self):
+        util = 0
+
+        for i in range(self.board.dim):
+            for j in range(self.board.dim):
+                if not self.board.is_tile_white(i, j):
+                    stack_height = len(self.board.board[i][j].colors)
+
+                    for k in range(0, stack_height):
+                        if k == 0:
+                            if self.board.board[i][j].get_color(0) == "O":
+                                util -= 2
+                            else:
+                                util += 2
+                        elif k == 7:
+                            if self.board.board[i][j].get_color(k) == "O":
+                                util -= 10
+                            else:
+                                util += 10
+                        elif k != stack_height:
+                            if self.board.board[i][j].get_color(k) == "O":
+                                util -= 2
+                            else:
+                                util += 2
+                        else:
+                            if self.board.board[i][j].get_color(k) == "O":
+                                util -= 1
+                            else:
+                                util += 1
+
+        return util
+    
+    def utility(self, maximize):
+        if maximize:
+            return self.utility_maximize_player()
+        return self.utility_minimize_player()
+
+    def make_move(self, move):
+        srcByte, direction, indexInByte = move
+        iFrom, jFrom = mappings.letters_to_numbers[srcByte[0]], int(srcByte[1]) - 1
+        iTo, jTo = iFrom + (1 if direction[0] == 'D' else -1), jFrom + (1 if direction[1] == 'D' else -1)
+
+        lenOfByte = self.board.board[iFrom][jFrom].move_to_byte(self.board.board[iTo][jTo], indexInByte)
+
+        if lenOfByte == 8:
+            topColor = self.board.board[iTo][jTo].get_color(7)
+            if topColor == 'X':
+                self.playerX.score += 1
+            else:
+                self.playerO.score += 1
+            self.board.board[iTo][jTo].colors = ''
+        self.play_turn = "O" if self.play_turn == "X" else "X"
+
+    def minimax(self, depth, alpha, beta, maximizing_player):
+        if depth == 0 or self.is_game_over():
+            return self.utility(maximizing_player)
+
+        possible_moves = self.find_all_possible_moves()
+
+        if maximizing_player:
+            max_eval = float('-inf')
+            for move in possible_moves:
+                current_state = deepcopy(self)
+                current_state.make_move(move)
+                eval = current_state.minimax(depth - 1, alpha, beta, False)
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+
+                if beta <= alpha:
+                    break
+
+            return max_eval
+        else:
+            min_eval = float('inf')
+            for move in possible_moves:
+                current_state = deepcopy(self)
+                current_state.make_move(move)
+                eval = current_state.minimax(depth - 1, alpha, beta, True)
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+
+                if beta <= alpha:
+                    break
+
+            return min_eval
+    
+    def get_best_move(self):
+        best_move = None
+        max_eval = float('-inf')
+        alpha = float('-inf')
+        beta = float('inf')
+        current_depth = 2 
+
+        possible_moves = self.find_all_possible_moves()
+
+        for move in possible_moves:
+            current_state = deepcopy(self)
+            current_state.make_move(move)
+            eval = current_state.minimax(current_depth, alpha, beta, self.play_turn == "X")
+
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+
+            alpha = max(alpha, eval)
+
+        current_depth += 1
+        return best_move
+
 
     def start_game(self):
+        ai_move = ''
         while True:
             if self.is_board_state_valid():
                 self.show_state()
@@ -102,6 +254,8 @@ class Game:
                 break
             print()
             print("Player X score: " + str(self.playerX.score) + "        Player O score: " + str(self.playerO.score))
+            print()
+            print("Last computer move: " + str(ai_move))
             print()
             print('=============================================================================')
             if self.play_turn == "X":
@@ -128,6 +282,23 @@ class Game:
                 else:
                     # self.playerX.play_best_move()
                     print("Computer turn")
+                    ai_move = self.get_best_move()
+                    print("AI moves: ", ai_move)
+                    possibleMoves = self.find_all_possible_moves()
+                    if(len(possibleMoves) == 0):
+                        self.play_turn = "O"
+                    (isPlayed, lenOfByte, iTo, jTo) = self.playerX.play_move(self.board, self.play_turn, possibleMoves, ai_move)
+                    if(isPlayed):
+                        if(lenOfByte == 8):
+                            topColor = self.board.board[iTo][jTo].get_color(7)
+                            if topColor == 'X':
+                                self.playerX.score += 1
+                            else:
+                                self.playerO.score += 1
+                            self.board.board[iTo][jTo].colors = ''
+                        self.play_turn = "O"
+                        continue
+                    input()
             else:
                 possibleMoves = self.find_all_possible_moves()
                 if(len(possibleMoves) == 0):
@@ -149,7 +320,23 @@ class Game:
                         continue
                     input()
                 else:
-                    # self.playerO.play_best_move()
                     print("Computer turn")
+                    ai_move = self.get_best_move()
+                    print("AI moves: ", ai_move)
+                    possibleMoves = self.find_all_possible_moves()
+                    if(len(possibleMoves) == 0):
+                        self.play_turn = "X"
+                    (isPlayed, lenOfByte, iTo, jTo) = self.playerO.play_move(self.board, self.play_turn, possibleMoves, ai_move)
+                    if(isPlayed):
+                        if(lenOfByte == 8):
+                            topColor = self.board.board[iTo][jTo].get_color(7)
+                            if topColor == 'X':
+                                self.playerX.score += 1
+                            else:
+                                self.playerO.score += 1
+                            self.board.board[iTo][jTo].colors = ''
+                        self.play_turn = "X"
+                        continue
+                    input()
         print("The game is over.")
         print("The winner is player " + ('X' if self.playerX.score > self.playerO.score else 'O'))

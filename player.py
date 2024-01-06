@@ -52,49 +52,60 @@ class Player:
             )
         )
 
-    def play_move(self, board: Board, playTurn, possibleMoves):
-        print("It is your turn to play! Color: " + self.byte_color)
-        src_byte = ""
-        move = ""
-        index_in_byte = ""
+    def play_move(self, board: Board, playTurn, possibleMoves, aiMove = None):
+        if aiMove == None:
+            print("It is your turn to play! Color: " + self.byte_color)
+            src_byte = ""
+            move = ""
+            index_in_byte = ""
 
-        print("Source byte: ", end="")
-        src_byte = input()
-        possibleMovesFromSrcByte = list(filter(lambda current: src_byte == current[0] , possibleMoves))
+            print("Source byte: ", end="")
+            src_byte = input()
+            possibleMovesFromSrcByte = list(filter(lambda current: src_byte == current[0] , possibleMoves))
 
-        if len(possibleMovesFromSrcByte) == 0:
-            print("Bad move. Please try again... Press anything to continue.")
-            return (False, False, False, False)
+            if len(possibleMovesFromSrcByte) == 0:
+                print("Bad move. Please try again... Press anything to continue.")
+                return (False, False, False, False)
 
-        print(possibleMovesFromSrcByte)
-        # izbacuje listu mogucih poteza za src_byte
+            print(possibleMovesFromSrcByte)
+            # izbacuje listu mogucih poteza za src_byte
 
-        print("Index of src byte: ", end="")
-        index_in_byte = input()
-        possibleMovesFromIndex = list(filter(lambda current: int(index_in_byte) == current[2] , possibleMovesFromSrcByte))
+            print("Index of src byte: ", end="")
+            index_in_byte = input()
+            possibleMovesFromIndex = list(filter(lambda current: int(index_in_byte) == current[2] , possibleMovesFromSrcByte))
 
-        if len(possibleMovesFromIndex) == 0:
-            print("Bad move. Please try again... Press anything to continue.")
-            return (False, False, False, False)
-        print(possibleMovesFromIndex)
-        
-        print("Move: ", end="")
-        move = input()
-        finalMove = list(filter(lambda current: move == current[1], possibleMovesFromIndex))
+            if len(possibleMovesFromIndex) == 0:
+                print("Bad move. Please try again... Press anything to continue.")
+                return (False, False, False, False)
+            print(possibleMovesFromIndex)
+            
+            print("Move: ", end="")
+            move = input()
+            finalMove = list(filter(lambda current: move == current[1], possibleMovesFromIndex))
 
-        if(len(finalMove) == 0):
-            print("Bad move. Please try again... Press anything to continue.")
-            return (False, False, False, False)
+            if(len(finalMove) == 0):
+                print("Bad move. Please try again... Press anything to continue.")
+                return (False, False, False, False)
 
-        if not self.test_move(board, src_byte, move, index_in_byte, playTurn):
-            print("Bad move. Please try again... Press anything to continue.")
-            return (False, False, False, False)
+            if not self.test_move(board, src_byte, move, index_in_byte, playTurn):
+                print("Bad move. Please try again... Press anything to continue.")
+                return (False, False, False, False)
 
-        iFrom = letters_to_numbers[src_byte[0]]
-        jFrom = int(src_byte[1]) - 1
-        
-        iTo = iFrom + (1 if move[0] == 'D' else -1)   # D - dole
-        jTo = jFrom + (1 if move[1] == 'D' else -1)   # D - desno
+            iFrom = letters_to_numbers[src_byte[0]]
+            jFrom = int(src_byte[1]) - 1
+            
+            iTo = iFrom + (1 if move[0] == 'D' else -1)   # D - dole
+            jTo = jFrom + (1 if move[1] == 'D' else -1)   # D - desno
 
-        lenOfByte = board.board[iFrom][jFrom].move_to_byte(board.board[iTo][jTo], int(index_in_byte))
-        return (True, lenOfByte, iTo, jTo)
+            lenOfByte = board.board[iFrom][jFrom].move_to_byte(board.board[iTo][jTo], int(index_in_byte))
+            return (True, lenOfByte, iTo, jTo)
+        else:
+            (src_byte, move, index_in_byte) = aiMove
+            iFrom = letters_to_numbers[src_byte[0]]
+            jFrom = int(src_byte[1]) - 1
+            
+            iTo = iFrom + (1 if move[0] == 'D' else -1)   # D - dole
+            jTo = jFrom + (1 if move[1] == 'D' else -1)   # D - desno
+
+            lenOfByte = board.board[iFrom][jFrom].move_to_byte(board.board[iTo][jTo], int(index_in_byte))
+            return (True, lenOfByte, iTo, jTo)

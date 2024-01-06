@@ -3,7 +3,7 @@ from typing import Tuple
 
 class Byte:
     def __init__(self, col: str, coords: Tuple[int, int]):
-        self.colors = []
+        self.colors = ''
         self.colors += col
         self.coords = coords
 
