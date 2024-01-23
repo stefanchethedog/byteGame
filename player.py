@@ -11,23 +11,23 @@ class Player:
     def is_move_out_of_bound(self, board: Board, src_byte, move) -> bool:
         if src_byte[0] == "A" and move[0] == "G":
             return True
-        if src_byte[0] == numbers_to_letters[board.dim] and move[0] == "D":
+        if src_byte[0] == numbers_to_letters[board.dim - 1] and move[0] == "D":
             return True
-        if src_byte[1] == "1" and move[1] == "L":
+        if src_byte[1:] == "1" and move[1] == "L":
             return True
-        if src_byte[1] == str(board.dim) and move[1] == "D":
+        if src_byte[1:] == str(board.dim) and move[1] == "D":
             return True
         return False
 
     def is_byte_empty(self, board: Board, src_byte) -> bool:
-        return board.board[letters_to_numbers[src_byte[0]]][int(src_byte[1]) - 1].is_empty()
+        return board.board[letters_to_numbers[src_byte[0]]][int(src_byte[1:]) - 1].is_empty()
 
     def is_index_in_byte_correct(
         self, board: Board, src_byte, index_in_byte, playTurn
     ) -> bool:
         if (
             board.board[letters_to_numbers[src_byte[0]]][
-                int(src_byte[1]) - 1
+                int(src_byte[1:]) - 1
             ].get_color(index_in_byte)
             != -1
         ):
@@ -35,7 +35,7 @@ class Player:
 
         if (
             board.board[letters_to_numbers[src_byte[0]]][
-                int(src_byte[1]) - 1
+                int(src_byte[1:]) - 1
             ].get_color(index_in_byte)
             == playTurn
         ):
@@ -92,7 +92,7 @@ class Player:
                 return (False, False, False, False)
 
             iFrom = letters_to_numbers[src_byte[0]]
-            jFrom = int(src_byte[1]) - 1
+            jFrom = int(src_byte[1:]) - 1
             
             iTo = iFrom + (1 if move[0] == 'D' else -1)   # D - dole
             jTo = jFrom + (1 if move[1] == 'D' else -1)   # D - desno
@@ -102,7 +102,7 @@ class Player:
         else:
             (src_byte, move, index_in_byte) = aiMove
             iFrom = letters_to_numbers[src_byte[0]]
-            jFrom = int(src_byte[1]) - 1
+            jFrom = int(src_byte[1:]) - 1
             
             iTo = iFrom + (1 if move[0] == 'D' else -1)   # D - dole
             jTo = jFrom + (1 if move[1] == 'D' else -1)   # D - desno

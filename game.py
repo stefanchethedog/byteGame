@@ -95,8 +95,15 @@ class Game:
             i += 1
         return possibleMoves
     
-    def utility_maximize_player(self):
+    def utility(self):
         util = 0
+
+        self.play_turn = "X"
+        possibleMovesX = self.find_all_possible_moves()
+        self.play_turn = "O"
+        possibleMovesO = self.find_all_possible_moves()
+        util += (len(possibleMovesX) - len(possibleMovesO))*2
+        self.play_turn = "X"
 
         for i in range(self.board.dim):
             for j in range(self.board.dim):
@@ -111,101 +118,41 @@ class Game:
                                 util -= 5
                         elif k == 7:
                             if self.board.board[i][j].get_color(k) == "X":
-                                util += 100
+                                util += 300
                             else:
-                                util -= 100
+                                util -= 300
                         elif k == stack_height - 1:
                             if k < 4:
                                 if self.board.board[i][j].get_color(k) == "X":
-                                    util += 4
+                                    util += (6 if len(possibleMovesX) > 10 else 12)
                                 else:
-                                    util -= 4
+                                    util -= (6 if len(possibleMovesX) > 10 else 12)
                             else:
                                 if self.board.board[i][j].get_color(k) == "X":
-                                    util += 6
+                                    util += (8 if len(possibleMovesX) > 10 else 16)
                                 else:
-                                    util -= 6
+                                    util -= (8 if len(possibleMovesX) > 10 else 16)
                         else:
                             if self.board.board[i][j].get_color(k) == "X":
                                 util += 4
                             else:
                                 util -= 4
-        possibleMovesX = self.find_all_possible_moves()
-        self.play_turn = "O"
-        possibleMovesO = self.find_all_possible_moves()
-        util += (len(possibleMovesX) - len(possibleMovesO))//2
-        self.play_turn = "X"
 
         if self.playerX.score == 1:
-            util += 120
+            util += 150
         if self.playerX.score == 2:
-            util += 1000
+            util += 200 if self.board.dim <= 8 else 50000
+        if self.playerX.score == 3:
+            util += 50000
 
         if self.playerO.score == 1:
-            util -= 120
+            util -= 150
         if self.playerO.score == 2:
-            util -= 1000
+            util -= 200 if self.board.dim <= 8 else 50000
+        if self.playerO.score == 3:
+            util -= 50000
 
         return util
-    
-    def utility_minimize_player(self):
-        util = 0
-
-        for i in range(self.board.dim):
-            for j in range(self.board.dim):
-                if not self.board.is_tile_white(i, j):
-                    stack_height = len(self.board.board[i][j].colors)
-
-                    for k in range(0, stack_height):
-                        if k == 0:
-                            if self.board.board[i][j].get_color(0) == "O":
-                                util -= 7
-                            else:
-                                util += 7
-                        elif k == 7:
-                            if self.board.board[i][j].get_color(k) == "O":
-                                util -= 50
-                            else:
-                                util += 50
-                        elif k == stack_height - 1:
-                            if k < 5:
-                                if self.board.board[i][j].get_color(k) == "O":
-                                    util -= 6
-                                else:
-                                    util += 6
-                            else:
-                                if self.board.board[i][j].get_color(k) == "O":
-                                    util -= 10
-                                else:
-                                    util += 10
-                        else:
-                            if self.board.board[i][j].get_color(k) == "O":
-                                util -= 4
-                            else:
-                                util += 4
-        possibleMovesO = self.find_all_possible_moves()
-        self.play_turn = "X"
-        possibleMovesX = self.find_all_possible_moves()
-        util += (len(possibleMovesX) - len(possibleMovesO)) * 6
-        self.play_turn = "O"
-
-        if self.playerX.score == 1:
-            util += 50
-        if self.playerX.score == 2:
-            util += 1000
-
-        if self.playerO.score == 1:
-            util -= 50
-        if self.playerO.score == 2:
-            util -= 1000
-
-        return util
-    
-    
-    def utility(self, maximize):
-        if maximize:
-            return self.utility_maximize_player()
-        return self.utility_minimize_player()
 
     def make_move(self, move):
         srcByte, direction, indexInByte = move
@@ -227,7 +174,7 @@ class Game:
 
     def minimax(self, depth, alpha, beta, maximizing_player):
         if depth == 0 or self.is_game_over():
-            return self.utility(maximizing_player)
+            return self.utility()
 
         possible_moves = self.find_all_possible_moves()
 
@@ -241,7 +188,7 @@ class Game:
                 alpha = max(alpha, eval)
 
                 if beta <= alpha:
-                    break
+                    return alpha
 
             return max_eval
         else:
@@ -254,7 +201,7 @@ class Game:
                 beta = min(beta, eval)
 
                 if beta <= alpha:
-                    break
+                    return beta
 
             return min_eval
     
@@ -264,25 +211,34 @@ class Game:
         min_eval = float('inf')
         alpha = float('-inf')
         beta = float('inf')
-        current_depth = 2 
+        current_depth = 3 
 
         possible_moves = self.find_all_possible_moves()
+
+        if(len(possible_moves) < 30):
+            current_depth = 3
+        if (len(possible_moves) < 25):
+            current_depth = 4
+        if (len(possible_moves) < 17):
+            current_depth = 5
+        if(len(possible_moves) < 12):
+            current_depth = 6
+        if(len(possible_moves) < 8):
+            current_depth = 7
+        if(len(possible_moves) < 5):
+            current_depth = 9
 
         for move in possible_moves:
             current_state = deepcopy(self)
             current_state.make_move(move)
-            eval = current_state.minimax(current_depth, alpha, beta, self.play_turn == "X")
+            eval = current_state.minimax(current_depth, alpha, beta, False)
 
-            if self.play_turn == 'X':
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = move
-                    alpha = max(alpha, eval)
-            else:
-                if eval < min_eval:
-                    min_eval = eval
-                    best_move = move
-                    beta = min(beta, eval)
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+                alpha = max(alpha, eval)
+
+            
 
 
         current_depth += 1
